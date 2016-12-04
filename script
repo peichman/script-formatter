@@ -10,43 +10,52 @@ binmode(STDOUT, ':encoding(UTF-8)');
 
 GetOptions(
     'format|f=s' => \my $FORMAT,
+    'column|c=i' => \my %COLUMN_FOR,
+    'skip=i'     => \my $SKIP_ROWS,
 );
 
 # default to html
 $FORMAT ||= 'html';
 
+$SKIP_ROWS = 1 unless defined $SKIP_ROWS;
+
 # character to highlight
 my $ME = shift || '';
 
+$COLUMN_FOR{speaker} && $COLUMN_FOR{number} && $COLUMN_FOR{text} or die "Missing column definitions\n";
+# adjust to 0-based index
+$_-- foreach values %COLUMN_FOR;
+
 my $csv = Text::CSV->new({ binary => 1 }) or die "Cannot use CSV: " . Text::CSV->error_diag;
 
-$csv->column_names($csv->getline(\*STDIN));
+# skip header rows, if any
+$csv->getline(\*STDIN) for (1 .. $SKIP_ROWS);
 
-my $last_character = '';
+my $last_speaker = '';
 my @current_speech;
 my @speeches;
-while (my $row = $csv->getline_hr(\*STDIN)) {
-    my $character = $row->{Who};
-    my $n = $row->{Row};
-    my $text = $row->{'#VALUE!'};
+while (my $row = $csv->getline(\*STDIN)) {
+    my $speaker = $row->[$COLUMN_FOR{speaker}];
+    my $number  = $row->[$COLUMN_FOR{number}];
+    my $text    = $row->[$COLUMN_FOR{text}];
     $text =~ s/^\s*|\s$//g;
-    if ($character ne $last_character) {
-        if ($character eq '.') {
+    if ($speaker ne $last_speaker) {
+        if ($speaker eq '.') {
             if (@current_speech) {
-                push @speeches, { type => 'speech', speaker => $last_character, lines => [ @current_speech ] };
+                push @speeches, { type => 'speech', speaker => $last_speaker, lines => [ @current_speech ] };
                 @current_speech = ();
             }
-            push @speeches, { type => 'direction', number => $n, text => $text };
+            push @speeches, { type => 'direction', number => $number, text => $text };
         } else {
             if (@current_speech) {
-                push @speeches, { type => 'speech', speaker => $last_character, lines => [ @current_speech ] };
+                push @speeches, { type => 'speech', speaker => $last_speaker, lines => [ @current_speech ] };
                 @current_speech = ();
             }
-            push @current_speech, { number => $n, text => $text, highlighted => ($character eq $ME) };
-            $last_character = $character;
+            push @current_speech, { number => $number, text => $text, highlighted => ($speaker eq $ME) };
+            $last_speaker = $speaker;
         }
     } else {
-        push @current_speech, { number => $n, text => $text, highlighted => ($character eq $ME) };
+        push @current_speech, { number => $number, text => $text, highlighted => ($speaker eq $ME) };
     }
 }
 $csv->eof or $csv->error_diag();
