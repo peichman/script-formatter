@@ -2,7 +2,8 @@
 use strict;
 
 use Getopt::Long;
-use Text::CSV;
+use File::Basename qw{fileparse};
+use Spreadsheet::Read;
 use Template;
 use YAML;
 
@@ -10,36 +11,44 @@ binmode(STDIN, ':encoding(UTF-8)');
 binmode(STDOUT, ':encoding(UTF-8)');
 
 GetOptions(
-    'format|f=s' => \my $FORMAT,
-    'column|c=i' => \my %COLUMN_FOR,
-    'skip=i'     => \my $SKIP_ROWS,
-    'dump|x'     => \my $DUMP,
+    'format|f=s'     => \my $FORMAT,
+    'column|c=i'     => \my %COLUMN_FOR,
+    'skip=i'         => \my $SKIP_ROWS,
+    'dump|x'         => \my $DUMP,
+    'input-file|i=s' => \my $INPUT_FILE,
+    'sheet=s'        => \my $SHEET_NUMBER,
+    'input-type|t=s' => \my $INPUT_TYPE,
 );
+
+# select the input type, default to csv
+my $input_type = $INPUT_TYPE ? $INPUT_TYPE :
+                 $INPUT_FILE ? substr((fileparse($INPUT_FILE, qr/\.[^.]*/))[2], 1) :
+                 'csv';
 
 # default to html
 $FORMAT ||= 'html';
 
+# default to first sheet
+$SHEET_NUMBER ||= 1;
+
 $SKIP_ROWS = 1 unless defined $SKIP_ROWS;
+my $start_row = 1 + $SKIP_ROWS;
 
 # character to highlight
 my $ME = shift || '';
 
 $COLUMN_FOR{speaker} && $COLUMN_FOR{number} && $COLUMN_FOR{text} or die "Missing column definitions\n";
-# adjust to 0-based index
-$_-- foreach values %COLUMN_FOR;
 
-my $csv = Text::CSV->new({ binary => 1 }) or die "Cannot use CSV: " . Text::CSV->error_diag;
-
-# skip header rows, if any
-$csv->getline(\*STDIN) for (1 .. $SKIP_ROWS);
+my $book = Spreadsheet::Read->new($INPUT_FILE || \*STDIN, parser => $input_type);
+my $sheet = $book->sheet($SHEET_NUMBER);
 
 my $last_speaker = '';
 my @current_speech;
 my @speeches;
-while (my $row = $csv->getline(\*STDIN)) {
-    my $speaker = $row->[$COLUMN_FOR{speaker}];
-    my $number  = $row->[$COLUMN_FOR{number}];
-    my $text    = $row->[$COLUMN_FOR{text}];
+for my $row_number ($start_row .. $sheet->maxrow) {
+    my $speaker = $sheet->cell($COLUMN_FOR{speaker}, $row_number);
+    my $number  = $sheet->cell($COLUMN_FOR{number}, $row_number);
+    my $text    = $sheet->cell($COLUMN_FOR{text}, $row_number);
     $text =~ s/^\s*|\s$//g;
     if ($speaker ne $last_speaker) {
         if ($speaker eq '.') {
@@ -60,7 +69,6 @@ while (my $row = $csv->getline(\*STDIN)) {
         push @current_speech, { number => $number, text => $text, highlighted => ($speaker eq $ME) };
     }
 }
-$csv->eof or $csv->error_diag();
 
 if ($DUMP) {
     print Dump(\@speeches);
