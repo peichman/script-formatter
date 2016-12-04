@@ -1,0 +1,83 @@
+<html>
+  <head>
+    <title>[% title %]</title>
+    <style type="text/css">
+body {
+  font-size: 15px;
+}
+.number {
+  float: left;
+  padding-top: .1em;
+  text-align: right;
+  width: 2em;
+}
+.direction {
+  font-style: italic;
+  margin-left: 6em;
+  margin-bottom: 1em;
+}
+.speech {
+  margin-bottom: 1em;
+}
+.speaker {
+  font-variant: small-caps;
+  margin-left: 4em;
+}
+.speaker::after {
+  content: '.';
+}
+.line {
+  margin-left: 6em;
+  width: 30em;
+}
+.number a {
+  color: #999;
+  text-decoration: none;
+  font-size: .8em;
+}
+.number a:hover {
+  text-decoration: underline;
+}
+.highlighted {
+  background: yellow;
+}
+:target .line {
+  border: 1px dotted blue;
+  background: lightblue;
+}
+:target .number a {
+  font-weight: bold;
+  color: black;
+}
+    </style>
+  </head>
+  <body>
+    <h1>[% title %]</h1>
+    [% FOREACH block IN blocks %]
+    [% IF block.type == 'direction' %]
+    <div id="line[% block.number %]">
+      <div class="number"><a href="#line[% block.number %]">[% block.number %]</a></div>
+      <div class="direction">[% block.text %]</div>
+    </div>
+    [% ELSE %]
+    <div class="speech">
+      <div class="speaker">[% block.speaker %]</div>
+      [% FOREACH line IN block.lines %]
+      <div id="line[% line.number %]">
+        <div class="number">
+          <a href="#line[% line.number %]" title="[% block.speaker %]">[% line.number %]</a>
+        </div>
+        <div class="line">
+          [% IF line.highlighted %]
+          <span class="highlighted">[% line.text %]</span>
+          [% ELSE %]
+          [% line.text %]
+          [% END %]
+        </div>
+      </div>
+      [% END %]
+    </div>
+    [% END %]
+    [% END %]
+  </body>
+</html>

@@ -1,0 +1,15 @@
+[% title %]
+[% '=' | repeat(title.length) %]
+
+[% FOREACH block IN blocks -%]
+[% IF block.type == 'direction' -%]
+[% block.number | format('%4d') %]      [[% block.text %]]
+
+[% ELSE -%]
+     [% block.speaker | upper %].
+[% FOREACH line IN block.lines -%]
+[% line.number | format('%4d') %]      [% line.text %]
+[% END -%]
+
+[% END -%]
+[% END -%]
