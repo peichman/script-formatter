@@ -4,6 +4,7 @@ use strict;
 use Getopt::Long;
 use Text::CSV;
 use Template;
+use YAML;
 
 binmode(STDIN, ':encoding(UTF-8)');
 binmode(STDOUT, ':encoding(UTF-8)');
@@ -12,6 +13,7 @@ GetOptions(
     'format|f=s' => \my $FORMAT,
     'column|c=i' => \my %COLUMN_FOR,
     'skip=i'     => \my $SKIP_ROWS,
+    'dump|x'     => \my $DUMP,
 );
 
 # default to html
@@ -59,6 +61,11 @@ while (my $row = $csv->getline(\*STDIN)) {
     }
 }
 $csv->eof or $csv->error_diag();
+
+if ($DUMP) {
+    print Dump(\@speeches);
+    exit;
+}
 
 # assume the first direction is the title
 my $title = (grep { $_->{type} eq 'direction' } @speeches)[0]->{text};
