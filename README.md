@@ -3,7 +3,7 @@
 Takes a Shakespearean script formatted as a spreadsheet and produces nicely
 formatted text, HTML, or XSL-FO output.
 
-## Quick Start
+## Synopsis
 
 ```
 # default input format is CSV
@@ -23,3 +23,19 @@ scriptf -c speaker=2 -c number=3 -c text=4 -f fo <richard2.csv | fop - - >richar
 # for Excel files, it selects sheet 1 by default; use --sheet to change
 scriptf -c speaker=2 -c number=3 -c text=4 -i richard2.xlsx --sheet 2 >richard2.html
 ```
+
+## Installation
+
+The easiest way to install the prerequisite modules is to use [cpanm] to download and install the dependencies listed in the [cpanfile](cpanfile).
+
+The following was tested and confirmed to work on a brand-new install of Ubuntu
+Xenial Xerus:
+
+```
+sudo apt-get install gcc make libexpat1-dev cpanminus
+git clone https://github.com/peichman/script-formatter.git
+cd script-formatter
+cpanm -S --installdeps .
+```
+
+[cpanm]: http://search.cpan.org/~miyagawa/App-cpanminus-1.7042/bin/cpanm
