@@ -6,6 +6,7 @@ use File::Basename qw{fileparse};
 use Spreadsheet::Read;
 use Template;
 use YAML;
+use FindBin qw{$RealBin};
 
 binmode(STDIN, ':encoding(UTF-8)');
 binmode(STDOUT, ':encoding(UTF-8)');
@@ -78,6 +79,6 @@ if ($DUMP) {
 # assume the first direction is the title
 my $title = (grep { $_->{type} eq 'direction' } @speeches)[0]->{text};
 
-my $tt = Template->new({ INCLUDE_PATH => '.' });
+my $tt = Template->new({ INCLUDE_PATH => $RealBin });
 
 $tt->process("script.$FORMAT", { title => $title, blocks => \@speeches }) or die $tt->error;
