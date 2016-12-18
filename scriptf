@@ -47,28 +47,24 @@ my $last_speaker = '';
 my @current_speech;
 my @speeches;
 for my $row_number ($start_row .. $sheet->maxrow) {
-    my $speaker = $sheet->cell($COLUMN_FOR{speaker}, $row_number);
-    my $number  = $sheet->cell($COLUMN_FOR{number}, $row_number);
-    my $text    = $sheet->cell($COLUMN_FOR{text}, $row_number);
-    my $scene   = $COLUMN_FOR{scene} ? $sheet->cell($COLUMN_FOR{scene}, $row_number) : '';
-    $text =~ s/^\s*|\s$//g;
-    if ($speaker ne $last_speaker) {
-        if ($speaker eq '.') {
-            if (@current_speech) {
-                push @speeches, { type => 'speech', speaker => $last_speaker, lines => [ @current_speech ] };
-                @current_speech = ();
-            }
-            push @speeches, { type => 'direction', number => $number, text => $text, scene => $scene };
+    my %row = (
+        speaker => $sheet->cell($COLUMN_FOR{speaker}, $row_number),
+        number  => $sheet->cell($COLUMN_FOR{number}, $row_number),
+        text    => $sheet->cell($COLUMN_FOR{text}, $row_number),
+        scene   => ($COLUMN_FOR{scene} ? $sheet->cell($COLUMN_FOR{scene}, $row_number) : ''),
+    );
+    $row{text} =~ s/^\s*|\s$//g;
+    if ($row{speaker} ne $last_speaker) {
+        if ($row{speaker} eq '.') {
+            append_speech() if @current_speech;
+            append_direction(%row);
         } else {
-            if (@current_speech) {
-                push @speeches, { type => 'speech', speaker => $last_speaker, lines => [ @current_speech ] };
-                @current_speech = ();
-            }
-            push @current_speech, { number => $number, text => $text, scene => $scene, highlighted => ($speaker eq $ME) };
-            $last_speaker = $speaker;
+            append_speech() if @current_speech;
+            append_line(%row);
+            $last_speaker = $row{speaker};
         }
     } else {
-        push @current_speech, { number => $number, text => $text, scene => $scene, highlighted => ($speaker eq $ME) };
+        append_line(%row);
     }
 }
 
@@ -83,3 +79,16 @@ my $title = (grep { $_->{type} eq 'direction' } @speeches)[0]->{text};
 my $tt = Template->new({ INCLUDE_PATH => $RealBin });
 
 $tt->process("script.$FORMAT", { title => $title, blocks => \@speeches }) or die $tt->error;
+
+sub append_speech {
+    push @speeches, { type => 'speech', speaker => $last_speaker, lines => [ @current_speech ] };
+    @current_speech = ();
+}
+sub append_direction {
+    my %row = @_;
+    push @speeches, { type => 'direction', %row };
+}
+sub append_line {
+    my %row = @_;
+    push @current_speech, { %row, highlighted => ($row{speaker} eq $ME) };
+}
