@@ -78,7 +78,12 @@ my $title = (grep { $_->{type} eq 'direction' } @speeches)[0]->{text};
 
 my $tt = Template->new({ INCLUDE_PATH => $RealBin });
 
-$tt->process("script.$FORMAT", { title => $title, blocks => \@speeches }) or die $tt->error;
+my %template_for = (
+    html => 'script.html',
+    fo   => 'script.fo',
+    txt  => 'script.txt',
+);
+$tt->process($template_for{$FORMAT}, { title => $title, blocks => \@speeches }) or die $tt->error;
 
 sub append_speech {
     push @speeches, { type => 'speech', speaker => $last_speaker, lines => [ @current_speech ] };
