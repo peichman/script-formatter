@@ -53,6 +53,7 @@ for my $row_number ($start_row .. $sheet->maxrow) {
         text    => $sheet->cell($COLUMN_FOR{text}, $row_number),
         scene   => ($COLUMN_FOR{scene} ? $sheet->cell($COLUMN_FOR{scene}, $row_number) : ''),
     );
+    next unless $row{number};
     $row{text} =~ s/^\s*|\s$//g;
     if ($row{speaker} ne $last_speaker) {
         if ($row{speaker} eq '.') {
