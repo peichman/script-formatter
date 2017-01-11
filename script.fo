@@ -13,7 +13,7 @@
       <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
         <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">
           <!-- Dublin Core properties go here -->
-          <dc:title>[% title %]</dc:title>
+          <dc:title>[% title | xml %]</dc:title>
           <!--
           <dc:creator>Document author</dc:creator>
           <dc:description>Document subject</dc:description>
@@ -31,28 +31,28 @@
 
   <fo:page-sequence master-reference="main" font-family="Times" font-weight="400" font-size="11.5pt">
     <fo:flow flow-name="xsl-region-body">
-      <fo:block font-size="1.5em" text-align="center" font-weight="bold" margin-bottom="1.5em">[% title %]</fo:block>
+      <fo:block font-size="1.5em" text-align="center" font-weight="bold" margin-bottom="1.5em">[% title | xml %]</fo:block>
       [% FOREACH block IN blocks %]
       [% IF block.type == 'direction' %]
       <fo:block margin-bottom="1em" keep-together="always">
         <fo:block-container width="2em" text-align="right">
-          <fo:block>[% block.number %]</fo:block>
+          <fo:block>[% block.number | xml %]</fo:block>
         </fo:block-container>
-        <fo:block margin-top="-1.25em" margin-left="6em" font-style="italic">[% block.text %]</fo:block>
+        <fo:block margin-top="-1.25em" margin-left="6em" font-style="italic">[% block.text | xml %]</fo:block>
       </fo:block>
       [% ELSE %]
       <fo:block margin-bottom="1em">
-        <fo:block margin-left="4em" keep-with-next="always">[% block.speaker | upper %].</fo:block>
+        <fo:block margin-left="4em" keep-with-next="always">[% block.speaker | upper | xml %].</fo:block>
         [% FOREACH line IN block.lines %]
         <fo:block keep-together="always">
           <fo:block-container width="2em" text-align="right">
-            <fo:block>[% line.number %]</fo:block>
+            <fo:block>[% line.number | xml %]</fo:block>
           </fo:block-container>
           <fo:block margin-top="-1.25em" margin-left="6em">
             [% IF line.highlighted %]
-            <fo:inline background-color="yellow">[% line.text %]</fo:inline>
+            <fo:inline background-color="yellow">[% line.text | xml %]</fo:inline>
             [% ELSE %]
-            [% line.text %]
+            [% line.text | xml %]
             [% END %]
           </fo:block>
         </fo:block>

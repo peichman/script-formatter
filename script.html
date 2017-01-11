@@ -55,22 +55,22 @@ body {
     [% FOREACH block IN blocks %]
     [% IF block.type == 'direction' %]
     <div id="line[% block.number %]">
-      <div class="number"><a href="#line[% block.number %]">[% block.number %]</a></div>
-      <div class="direction">[% block.text %]</div>
+      <div class="number"><a href="#line[% block.number %]">[% block.number | html %]</a></div>
+      <div class="direction">[% block.text | html %]</div>
     </div>
     [% ELSE %]
     <div class="speech">
-      <div class="speaker">[% block.speaker %]</div>
+      <div class="speaker">[% block.speaker | html %]</div>
       [% FOREACH line IN block.lines %]
-      <div id="line[% line.number %]">
+      <div id="line[% line.number | html %]">
         <div class="number">
-          <a href="#line[% line.number %]" title="[% block.speaker %]">[% line.number %]</a>
+          <a href="#line[% line.number | html %]" title="[% block.speaker | html %]">[% line.number | html %]</a>
         </div>
         <div class="line">
           [% IF line.highlighted %]
-          <span class="highlighted">[% line.text %]</span>
+          <span class="highlighted">[% line.text | html %]</span>
           [% ELSE %]
-          [% line.text %]
+          [% line.text | html %]
           [% END %]
         </div>
       </div>
