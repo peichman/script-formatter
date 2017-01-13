@@ -3,8 +3,9 @@
 <fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format">
   <fo:layout-master-set>
     <fo:simple-page-master master-name="main" page-width="8.5in" page-height="11in" margin-left="1.5in" margin-right="1.5in" margin-top="1in" margin-bottom="1in">
-      <fo:region-body margin-top=".5in"/>
+      <fo:region-body margin-top=".5in" margin-bottom=".25in"/>
       <fo:region-before extent=".25in"/>
+      <fo:region-after extent=".25in"/>
     </fo:simple-page-master>
   </fo:layout-master-set>
 
@@ -30,6 +31,11 @@
   </fo:declarations>
 
   <fo:page-sequence master-reference="main" font-family="Times" font-weight="400" font-size="11.5pt">
+    <fo:static-content flow-name="xsl-region-after">
+      <fo:block text-align="right">
+	<fo:page-number/>
+      </fo:block>
+    </fo:static-content>
     <fo:flow flow-name="xsl-region-body">
       <fo:block font-size="1.5em" text-align="center" font-weight="bold" margin-bottom="1.5em">[% title | xml %]</fo:block>
       [% FOREACH block IN blocks %]
