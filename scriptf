@@ -29,6 +29,15 @@ my $input_type = $INPUT_TYPE ? $INPUT_TYPE :
 # default to html
 $FORMAT ||= 'html';
 
+my %template_for = (
+    html => 'script.html',
+    fo   => 'script.fo',
+    pdf  => 'script.fo',
+    ps   => 'script.fo',
+    txt  => 'script.txt',
+);
+die "Unknown format '$FORMAT'\n" unless $template_for{$FORMAT};
+
 # default to first sheet
 $SHEET_NUMBER ||= 1;
 
@@ -79,12 +88,15 @@ my $title = (grep { $_->{type} eq 'direction' } @speeches)[0]->{text};
 
 my $tt = Template->new({ INCLUDE_PATH => $RealBin });
 
-my %template_for = (
-    html => 'script.html',
-    fo   => 'script.fo',
-    txt  => 'script.txt',
-);
-$tt->process($template_for{$FORMAT}, { title => $title, blocks => \@speeches }) or die $tt->error;
+my $output;
+if ($FORMAT eq 'pdf') {
+    open($output, '|-', 'fop - -pdf -') or die "Unable to execute fop for writing PDF\n";
+} elsif ($FORMAT eq 'ps') {
+    open($output, '|-', 'fop - -ps -') or die "Unable to execute fop for writing PostScript\n";
+} else {
+    $output = \*STDOUT;
+}
+$tt->process($template_for{$FORMAT}, { title => $title, blocks => \@speeches }, $output) or die $tt->error;
 
 sub append_speech {
     push @speeches, { type => 'speech', speaker => $last_speaker, lines => [ @current_speech ] };

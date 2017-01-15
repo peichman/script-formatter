@@ -1,7 +1,7 @@
 # script-formatter
 
 Takes a Shakespearean script formatted as a spreadsheet and produces nicely
-formatted text, HTML, or XSL-FO output.
+formatted output.
 
 ## Synopsis
 
@@ -17,6 +17,10 @@ scriptf -c speaker=2 -c number=3 -c text=4 <richard2.csv >richard2.html
 scriptf -c speaker=2 -c number=3 -c text=4 -f txt <richard2.csv >richard2.txt
 # XSL-FO (using FOP to create PDF)
 scriptf -c speaker=2 -c number=3 -c text=4 -f fo <richard2.csv | fop - - >richard2.pdf
+# PDF (uses FOP internally)
+scriptf -c speaker=2 -c number=3 -c text=4 -f pdf <richard2.csv >richard2.pdf
+# PS (uses FOP internally)
+scriptf -c speaker=2 -c number=3 -c text=4 -f ps <richard2.csv >richard2.ps
 
 # select a different input format
 # given an input file name, it will use the file extension to select a parser
@@ -32,7 +36,7 @@ The following was tested and confirmed to work on a brand-new install of Ubuntu
 Xenial Xerus:
 
 ```
-sudo apt-get install gcc make libexpat1-dev cpanminus
+sudo apt-get install gcc make libexpat1-dev cpanminus fop
 git clone https://github.com/peichman/script-formatter.git
 cd script-formatter
 cpanm -S --installdeps .
